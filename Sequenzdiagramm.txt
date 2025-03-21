@@ -1,0 +1,17 @@
+title LabyrinthGame
+Client->Server:start game
+Client<--Server:gameID
+loop until done
+Client->Server:move (direction)
+alt success
+    Client<--Server: status(200) + space 
+else out of space
+    Client<--Server: status(400) + failure
+else closedSpace
+    Client<--Server: closedSpace
+else win
+   Client<--Server: status(200) + finished(on Space E5)
+end
+end
+
+Client<--Server:game closed
