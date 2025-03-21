@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: Labyrinth Game
+  description: |
+    **Labyrinth Game** - Find the only way to the goal!
+    
+    - The game board is a 5x5 grid (A1 to E5)
+    - The player always starts at **A1** and must reach **E5**
+    - There is only one valid path to the goal
+    - Blocked fields cannot be entered
+    - Movement is limited to **one tile per turn** in four directions (left, right, up, down)
+    - If the player moves outside the board, the game ends with **"failed"**
+    - If the player reaches **E5**, the game ends with **"success"**
+    - If the player moves into a blocked field, they stay in place and receive a message
+  version: 1.0.0
+
+servers:
+  - url: "open"
+    description: "open"
+
+paths:
+  /game:
+    post:
+      summary: Start a new game
+      operationId: startGame
+      responses:
+        '200':
+          description: Game started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Invalid request
+
+  /game/{gameId}/move:
+    post:
+      summary: Make a move in the game
+      operationId: makeMove
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          description: Unique game ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveInput'
+      responses:
+        '200':
+          description: Move processed successfully (could be blocked)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Move'
+        '400':
+          description: "Invalid request (e.g., malformed JSON or unsupported direction)"
+        '404':
+          description: "Game not found"
+        '410':
+          description: "Game Over (e.g., moved out of bounds)"
+
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        gameId:
+          type: string
+          description: Unique game ID
+        status:
+          type: string
+          enum: [ongoing, success, failed]
+          description: Game status (**"ongoing"**, **"success"**, **"failed"**)
+        currentPosition:
+          type: string
+          description: Player's current position (e.g., "B2")
+        startPosition:
+          type: string
+          enum: ["A1"]
+          description: Starting position of the player (not necessary, because our startpoint is known)
+        endPosition:
+          type: string
+          enum: ["E5"]
+          description: Goal position of the player (not necessary, because our endpoint is known)
+      required:
+        - gameId
+        - status
+        - currentPosition
+        - startPostion
+        - endPostion
+
+    Move:
+      type: object
+      properties:
+        moveId:
+          type: string
+          description: Unique move ID
+        status:
+          type: string
+          enum: [success, blocked, invalid]
+          description: Move status (**"success"**, **"blocked"**, **"invalid"**)
+        position:
+          type: string
+          description: New player position after the move (e.g., "C3")
+      required:
+        - moveId
+        - status
+        - position
+
+    MoveInput:
+      type: object
+      properties:
+        direction:
+          type: string
+          enum: [right, left, up, down]
+          description: Move direction
+      required:
+        - direction
