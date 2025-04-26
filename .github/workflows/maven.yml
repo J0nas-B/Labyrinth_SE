@@ -25,4 +25,4 @@ jobs:
 
     - name: Run Maven Build
       run: mvn clean install -B
-      working-directory: ./Labyrinth_SE/LabyrinthClient
+      working-directory: ./LabyrinthClient
